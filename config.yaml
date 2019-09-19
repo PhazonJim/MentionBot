@@ -1,0 +1,11 @@
+client:
+  client_id: 'client_id'
+  user_agent: 'user_agent'
+  client_secret: 'client_secret'
+  code: 'code'
+  redirect_token: 'redirect_token'
+
+subreddit: 'all'
+webhook: 'foobar'
+#<rule number> : <rule regex pattern - whitespace is removed automatically to simplify things>
+regex: '\/r\/[g|G]aming'
