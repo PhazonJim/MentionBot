@@ -25,7 +25,7 @@ def init():
     global postCache
 
     #Load configs
-    config = yaml.load(open('config.yaml').read())
+    config = yaml.load(open(os.path.join(os.path.dirname(__file__),'config.yaml')).read())
     client = config['client']
 
     #Set up APIs
