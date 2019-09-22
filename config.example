@@ -1,9 +1,5 @@
-client:
- client_id: 'client_id'
- user_agent: 'user_agent'
- client_secret: 'client_secret'
- code: 'code'
- redirect_token: 'redirect_token'
 webhook: 'https://discordapp.com/api/webhooks/<myhook>'
+maxResults: 50
 searchString: 'r/AskReddit'
-ignore: 'AskReddit'
+subredditsToIgnore: 
+    - 'AskReddit'

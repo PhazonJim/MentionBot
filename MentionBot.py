@@ -9,67 +9,68 @@ from pprint import pprint
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 #===Globals===#
-#Reddit PRAW Object
-reddit = None
 #Config file
 config = None
-webhook = None
-api = None
-postCache = None
 
-def init():
+def loadConfig():
     global config
-    global reddit
-    global webhook
-    global api
-    global postCache
-
     #Load configs
-    config = yaml.load(open(os.path.join(os.path.dirname(__file__),'config.yaml')).read())
-    client = config['client']
+    try:
+        config = yaml.load(open(os.path.join(os.path.dirname(__file__),'config.yaml')).read())
+    except:
+        print("'config.yaml' could not be located. Please ensure 'config.example' has been renamed")
+        exit()
 
-    #Set up APIs
-    reddit = praw.Reddit(**client)
-    api = PushshiftAPI()
-    webhook = webhook = DiscordWebhook(url=config["webhook"])
-    
-    #Load post cache
-    postCacheName = os.path.join(os.path.dirname(__file__), "cache.json")
-    with open(postCacheName, 'r') as fin:
-        cache = fin.read()
-    postCache = json.loads(cache)
-
-def saveCache():
+def saveCache(postCache):
     postCacheName = os.path.join(os.path.dirname(__file__), "cache.json")
     with open(postCacheName, 'w') as fout:
         for chunk in json.JSONEncoder().iterencode(postCache):
             fout.write(chunk)
 
-def postWebhook(mentions):
+def loadCache():
+    postCache = {}
+    postCacheName = os.path.join(os.path.dirname(__file__), "cache.json")
+    try:
+        with open(postCacheName, 'r') as fin:
+            cache = fin.read()
+        postCache = json.loads(cache)
+    except:
+        pass
+    return postCache
+
+def postWebhook(webhook, mentions, postCache):
     for comment in mentions:
-        title = 'Posted on {} by {}'.format(comment.subreddit, comment.author)
-        description = '[Comment]({})'.format('https://www.reddit.com' + comment.permalink)
-        embed = DiscordEmbed(title=title, description=description, color=242424)
-        webhook.add_embed(embed)
-        webhook.execute()
-        webhook.remove_embed(0)
-        postCache[comment.id] = comment.permalink
-        time.sleep(3)
+        try:
+            title = 'Posted on {} by {}'.format(comment.subreddit, comment.author)
+            description = '[Comment]({})'.format('https://www.reddit.com' + comment.permalink)
+            print(title)
+            print(description)
+            embed = DiscordEmbed(title=title, description=description, color=242424)
+            #webhook.add_embed(embed)
+            #webhook.execute()
+            #webhook.remove_embed(0)
+            postCache[comment.id] = comment.permalink
+        except:
+            pass
+    return postCache
 
 if __name__ == '__main__':
     #Initiate a bunch of stuff
-    init()
+    loadConfig()
+    api = PushshiftAPI()
+    webhook = DiscordWebhook(url=config["webhook"])
+    postCache = loadCache()
     #Scan stream of comments to find mentions of word
     try:
-        gen = api.search_comments(q='"'+ config['searchString'] + '"', limit=50)
+        gen = api.search_comments(q='"'+ config['searchString'] + '"', limit=config['maxResults'])
         mentions = []
         for comment in gen:
-            if comment.subreddit != config['ignore'] and comment.id not in postCache:
+            if comment.subreddit not in config['subredditsToIgnore'] and comment.id not in postCache:
                 if config['searchString'] in comment.body.lower():
                     print("New comment! " + comment.id)
                     mentions.append(comment)
         if mentions:
-            postWebhook(mentions)
-            saveCache()
+            postCache = postWebhook(webhook, mentions, postCache)
+            saveCache(postCache)
     except:
         pass
