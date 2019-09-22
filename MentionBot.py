@@ -46,9 +46,9 @@ def postWebhook(webhook, mentions, postCache):
             print(title)
             print(description)
             embed = DiscordEmbed(title=title, description=description, color=242424)
-            #webhook.add_embed(embed)
-            #webhook.execute()
-            #webhook.remove_embed(0)
+            webhook.add_embed(embed)
+            webhook.execute()
+            webhook.remove_embed(0)
             postCache[comment.id] = comment.permalink
         except:
             pass
