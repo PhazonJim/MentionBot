@@ -16,7 +16,7 @@ def loadConfig():
     global config
     #Load configs
     try:
-        config = yaml.load(open(os.path.join(os.path.dirname(__file__),'config.yaml')).read())
+        config = yaml.load(open(os.path.join(os.path.dirname(__file__),'config.yaml')).read(), Loader=yaml.FullLoader)
     except:
         print("'config.yaml' could not be located. Please ensure 'config.example' has been renamed")
         exit()
