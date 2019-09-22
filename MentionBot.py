@@ -53,25 +53,23 @@ def postWebhook(mentions):
         webhook.add_embed(embed)
         webhook.execute()
         webhook.remove_embed(0)
+        postCache[comment.id] = comment.permalink
         time.sleep(3)
 
 if __name__ == '__main__':
     #Initiate a bunch of stuff
     init()
     #Scan stream of comments to find mentions of word
-    while(True):
-        try:
-            gen = api.search_comments(q='"'+ config['searchString'] + '"', limit=50)
-            mentions = []
-            for comment in gen:
-                if comment.subreddit != config['ignore'] and comment.id not in postCache:
-                    if config['searchString'] in comment.body.lower():
-                        print("New comment! " + comment.id)
-                        postCache[comment.id] = comment.permalink
-                        mentions.append(comment)
-            if mentions:
-                postWebhook(mentions)
-                saveCache()
-        except:
-            pass
-        time.sleep(60)
+    try:
+        gen = api.search_comments(q='"'+ config['searchString'] + '"', limit=50)
+        mentions = []
+        for comment in gen:
+            if comment.subreddit != config['ignore'] and comment.id not in postCache:
+                if config['searchString'] in comment.body.lower():
+                    print("New comment! " + comment.id)
+                    mentions.append(comment)
+        if mentions:
+            postWebhook(mentions)
+            saveCache()
+    except:
+        pass
