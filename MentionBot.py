@@ -46,11 +46,14 @@ def postWebhook(webhook, mentions, postCache):
             print(title)
             print(description)
             embed = DiscordEmbed(title=title, description=description, color=242424)
+            embed.add_embed_field(name='Comment Preview:', value=comment.body)
             webhook.add_embed(embed)
             webhook.execute()
             webhook.remove_embed(0)
             postCache[comment.id] = comment.permalink
-        except:
+            time.sleep(3)
+        except e:
+            print(e)
             pass
     return postCache
 
@@ -72,5 +75,6 @@ if __name__ == '__main__':
         if mentions:
             postCache = postWebhook(webhook, mentions, postCache)
             saveCache(postCache)
-    except:
+    except e:
+        print(e)
         pass
