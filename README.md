@@ -1,4 +1,4 @@
-# RemovalReasonBot
+# MentionBot
 A reddit bot for finding comments containing specific key phrases and notifying a discord webhook
 
 # environment setup instructions
