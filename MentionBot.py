@@ -1,4 +1,3 @@
-import praw
 from psaw import PushshiftAPI
 import os
 import re
