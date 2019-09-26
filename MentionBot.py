@@ -66,7 +66,7 @@ def postWebhook(webhook, mentions, postCache, mentionType):
             pass
     return postCache
 
-def queryPushshift(api, queryType):
+def queryPushshift(api, postCache, queryType):
     try:
         gen = None
         mentions = []
@@ -96,12 +96,12 @@ if __name__ == '__main__':
     webhook = DiscordWebhook(url=config["webhook"])
     postCache = loadCache()
     #Scan stream of comments to find mentions of word
-    commentMentions = queryPushshift(api, 'comments')
+    commentMentions = queryPushshift(api, postCache, 'comments')
     if commentMentions:
         postCache = postWebhook(webhook, commentMentions, postCache, 'comments')
         saveCache(postCache)
     #Scan stream of submissions to find mentions of word
-    submissionMentions = queryPushshift(api, 'submissions')
+    submissionMentions = queryPushshift(api, postCache, 'submissions')
     if submissionMentions:
         postCache = postWebhook(webhook, submissionMentions, postCache, 'submissions')
         saveCache(postCache)
