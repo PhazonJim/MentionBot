@@ -5,6 +5,7 @@ import re
 import yaml
 import json
 import time
+import textwrap
 from pprint import pprint
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
@@ -28,7 +29,7 @@ def saveCache(postCache):
             fout.write(chunk)
 
 def loadCache():
-    postCache = {}
+    postCache = {"comments":{}, "submissions":{}}
     postCacheName = os.path.join(os.path.dirname(__file__), "cache.json")
     try:
         with open(postCacheName, 'r') as fin:
@@ -38,24 +39,56 @@ def loadCache():
         pass
     return postCache
 
-def postWebhook(webhook, mentions, postCache):
-    for comment in mentions:
-        try:
-            title = 'Posted on {} by {}'.format(comment.subreddit, comment.author)
-            description = '[Comment]({})'.format('https://www.reddit.com' + comment.permalink)
-            print(title)
-            print(description)
-            embed = DiscordEmbed(title=title, description=description, color=242424)
-            embed.add_embed_field(name='Comment Preview:', value=comment.body)
+def postWebhook(webhook, mentions, postCache, mentionType):
+    for item in mentions:
+        try:            
+            title = 'Posted on {} by {}'.format(item.subreddit, item.author)
+            embed = None
+
+            if mentionType == 'comments':
+                description = '[Comment Permalink]({})'.format('https://www.reddit.com' + item.permalink)
+                embed = DiscordEmbed(title=title, description=description, color=242424)
+                embed.add_embed_field(name='Comment Preview:', value=textwrap.shorten(item.body, width=900, placeholder="...(Too long to preview full content)..."))
+            
+            elif mentionType == 'submissions':
+                description = '[Submission Permalink]({})'.format('https://www.reddit.com' + item.permalink)
+                embed = DiscordEmbed(title=title, description=description, color=242424)
+                embed.add_embed_field(name='Submission Title:', value=item.title)
+                embed.add_embed_field(name='Submission Preview:', value=textwrap.shorten(item.selftext, width=900, placeholder="...(Too long to preview full content)...") if item.selftext else 'Submission is a direct link')
+            
             webhook.add_embed(embed)
             webhook.execute()
             webhook.remove_embed(0)
-            postCache[comment.id] = comment.permalink
+            postCache[mentionType][item.id] = item.permalink
             time.sleep(3)
-        except e:
+
+        except Exception as e:
             print(e)
             pass
     return postCache
+
+def queryPushshift(api, queryType):
+    try:
+        gen = None
+        mentions = []
+        if queryType == 'comments':
+            gen = api.search_comments(q='"'+ config['searchString'] + '"', limit=config['maxResults'])
+        elif queryType == 'submissions':
+            gen = api.search_submissions(q='"'+ config['searchString'] + '"', limit=config['maxResults'])
+        for item in gen:
+            if item.subreddit not in config['subredditsToIgnore']:
+                if queryType == 'comments' and item.id not in postCache['comments']:
+                    if config['searchString'] in item.body.lower():
+                        print("New comment! " + item.id)
+                        mentions.append(item)
+                if queryType == 'submissions' and item.id not in postCache['submissions']:
+                    if config['searchString'] in item.selftext.lower() or config['searchString'] in item.title.lower():
+                        print("New submission! " + item.id)
+                        mentions.append(item)
+        return mentions
+    except Exception as e:
+        print(e)
+        pass
 
 if __name__ == '__main__':
     #Initiate a bunch of stuff
@@ -64,17 +97,12 @@ if __name__ == '__main__':
     webhook = DiscordWebhook(url=config["webhook"])
     postCache = loadCache()
     #Scan stream of comments to find mentions of word
-    try:
-        gen = api.search_comments(q='"'+ config['searchString'] + '"', limit=config['maxResults'])
-        mentions = []
-        for comment in gen:
-            if comment.subreddit not in config['subredditsToIgnore'] and comment.id not in postCache:
-                if config['searchString'] in comment.body.lower():
-                    print("New comment! " + comment.id)
-                    mentions.append(comment)
-        if mentions:
-            postCache = postWebhook(webhook, mentions, postCache)
-            saveCache(postCache)
-    except e:
-        print(e)
-        pass
+    commentMentions = queryPushshift(api, 'comments')
+    if commentMentions:
+        postCache = postWebhook(webhook, commentMentions, postCache, 'comments')
+        saveCache(postCache)
+    #Scan stream of submissions to find mentions of word
+    submissionMentions = queryPushshift(api, 'submissions')
+    if submissionMentions:
+        postCache = postWebhook(webhook, submissionMentions, postCache, 'submissions')
+        saveCache(postCache)
