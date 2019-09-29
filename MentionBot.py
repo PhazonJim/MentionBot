@@ -54,7 +54,7 @@ def postWebhook(webhook, mentions, postCache, mentionType):
                 embed = DiscordEmbed(title=title, description=description, color=242424)
                 embed.add_embed_field(name='Submission Title:', value=item.title)
                 embed.add_embed_field(name='Submission Preview:', value=textwrap.shorten(item.selftext, width=900, placeholder="...(Too long to preview full content)...") if item.selftext else 'Submission is a direct link')
-            
+            embed.set_image(url=config['imageUrl'])
             webhook.add_embed(embed)
             webhook.execute()
             webhook.remove_embed(0)
