@@ -1,6 +1,6 @@
 #rename to config.yaml
-webhook: 'https://discordapp.com/api/webhooks/<myhook>'
+webhook: "https://discordapp.com/api/webhooks/<myhook>"
 maxResults: 50
-searchString: 'r/AskReddit'
+searchString: "r/AskReddit"
 subredditsToIgnore: 
-    - 'AskReddit'
+  - "AskReddit"
