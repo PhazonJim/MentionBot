@@ -34,8 +34,8 @@ def loadCache():
         with open(postCacheName, 'r') as fin:
             cache = fin.read()
         postCache = json.loads(cache)
-    except:
-        pass
+    except Exception as e:
+        print (e)
     return postCache
 
 def postWebhook(webhook, mentions, postCache, mentionType):
