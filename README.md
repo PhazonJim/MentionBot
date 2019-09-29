@@ -17,5 +17,5 @@ A reddit bot for finding comments containing specific key phrases and notifying 
 # Features
 1. Fetches last X comments (configured in config.yaml) and caches ids to avoid notifying multiple times for the same comment.
 
-#TODO
+# TODO
 1. TODO
