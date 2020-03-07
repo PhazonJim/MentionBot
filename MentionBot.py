@@ -43,7 +43,7 @@ def postWebhook(webhook, item, postCache, mentionType):
         title = "Posted on {} by {}".format(item.subreddit, item.author)
         embed = None
         if mentionType == "comments":
-            description = "[Comment Permalink]({})".format("https://www.reddit.com" + item.permalink)
+            description = "[Comment Permalink]({})".format("https://www.reddit.com" + item.permalink + "?context=10000")
             embed = DiscordEmbed(title=title, description=description, color=242424)
             embed.add_embed_field(name="Comment Preview:", value=textwrap.shorten(item.body, width=900, placeholder="...(Too long to preview full content)..."))
         elif mentionType == "submissions":
