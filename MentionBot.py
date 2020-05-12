@@ -48,13 +48,13 @@ def postWebhook(webhook, item, postCache, mentionType):
             embed = DiscordEmbed(title=title, description=description, color=242424)
             embed.add_embed_field(name="Comment Preview:", value=textwrap.shorten(item.body, width=900, placeholder="...(Too long to preview full content)..."))
         elif mentionType == "submissions":
-            selftext = 'No self text'
+            selftext = 'Submission is direct link'
             if hasattr(item, 'selftext'):
                 selftext = item.selftext
             description = "[Submission Permalink]({})".format("https://www.reddit.com" + item.permalink)
             embed = DiscordEmbed(title=title, description=description, color=242424)
             embed.add_embed_field(name="Submission Title:", value=item.title)
-            embed.add_embed_field(name="Submission Preview:", value=textwrap.shorten(selftext, width=900, placeholder="...(Too long to preview full content)...") if item.selftext else "Submission is a direct link")
+            embed.add_embed_field(name="Submission Preview:", value=textwrap.shorten(selftext, width=900, placeholder="...(Too long to preview full content)..."))
         webhook.add_embed(embed)
         webhook.execute()
         webhook.remove_embed(0)
