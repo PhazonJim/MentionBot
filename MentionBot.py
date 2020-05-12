@@ -48,10 +48,13 @@ def postWebhook(webhook, item, postCache, mentionType):
             embed = DiscordEmbed(title=title, description=description, color=242424)
             embed.add_embed_field(name="Comment Preview:", value=textwrap.shorten(item.body, width=900, placeholder="...(Too long to preview full content)..."))
         elif mentionType == "submissions":
+            selftext = 'No self text'
+            if hasattr(item, 'selftext'):
+                selftext = item.selftext
             description = "[Submission Permalink]({})".format("https://www.reddit.com" + item.permalink)
             embed = DiscordEmbed(title=title, description=description, color=242424)
             embed.add_embed_field(name="Submission Title:", value=item.title)
-            embed.add_embed_field(name="Submission Preview:", value=textwrap.shorten(item.selftext, width=900, placeholder="...(Too long to preview full content)...") if item.selftext else "Submission is a direct link")
+            embed.add_embed_field(name="Submission Preview:", value=textwrap.shorten(selftext, width=900, placeholder="...(Too long to preview full content)...") if item.selftext else "Submission is a direct link")
         webhook.add_embed(embed)
         webhook.execute()
         webhook.remove_embed(0)
@@ -76,8 +79,14 @@ def queryPushshift(api, postCache, queryType):
                     if config["searchString"] in item.body.lower():
                         mentions.append(item)
                 if queryType == "submissions" and item.id not in postCache["submissions"]:
-                    if config["searchString"] in item.selftext.lower() or config["searchString"] in item.title.lower():
-                        mentions.append(item)
+                    if hasattr(item, 'selftext'):
+                        if config["searchString"] in item.selftext.lower():
+                            mentions.append(item)
+                        elif config["searchString"] in item.title.lower(): #dumb hack, fix this later
+                            mentions.append(item)
+                    else hasattr(item, 'title'):
+                        if config["searchString"] in item.title.lower():
+                            mentions.append(item)
         return mentions
     except Exception as e:
         print(e)
