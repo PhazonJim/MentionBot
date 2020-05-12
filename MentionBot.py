@@ -84,7 +84,7 @@ def queryPushshift(api, postCache, queryType):
                             mentions.append(item)
                         elif config["searchString"] in item.title.lower(): #dumb hack, fix this later
                             mentions.append(item)
-                    else hasattr(item, 'title'):
+                    elif hasattr(item, 'title'):
                         if config["searchString"] in item.title.lower():
                             mentions.append(item)
         return mentions
