@@ -6,6 +6,7 @@ import json
 import time
 import textwrap
 from pprint import pprint
+from datetime import datetime, timedelta
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 #===Constants===#
@@ -62,10 +63,11 @@ def postWebhook(webhook, item, postCache, mentionType):
 
 def queryPushshift(api, postCache, queryType):
     try:
+        start_epoch = int((datetime.now() - timedelta(minutes=config["timePassed"])).timestamp())
         gen = None
         mentions = []
         if queryType == "comments":
-            gen = api.search_comments(q='"'+ config["searchString"] + '"', limit=config["maxResults"])
+            gen = api.search_comments(q='"'+ config["searchString"] + '"', after=start_epoch, limit=config["maxResults"])
         elif queryType == "submissions":
             gen = api.search_submissions(q='"'+ config["searchString"] + '"', limit=config["maxResults"])
         for item in gen:
@@ -94,8 +96,9 @@ if __name__ == "__main__":
         time.sleep(3)
     #Scan stream of submissions to find mentions of word
     submissionMentions = queryPushshift(api, postCache, "submissions")
-    for submission in submissionMentions:
-        postCache = postWebhook(webhook, submission, postCache, "submissions")
-        time.sleep(3)
+    if submissionMentions:
+        for submission in submissionMentions:
+            postCache = postWebhook(webhook, submission, postCache, "submissions")
+            time.sleep(3)
     if postCache:
         saveCache(postCache)
