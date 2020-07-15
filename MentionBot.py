@@ -72,7 +72,7 @@ def queryPushshift(api, postCache, queryType):
         if queryType == "comments":
             gen = api.search_comments(q='"'+ config["searchString"] + '"', after=start_epoch, limit=config["maxResults"])
         elif queryType == "submissions":
-            gen = api.search_submissions(q='"'+ config["searchString"] + '"', limit=config["maxResults"])
+            gen = api.search_submissions(q='"'+ config["searchString"] + '"', after=start_epoch,limit=config["maxResults"])
         for item in gen:
             if item.subreddit not in config["subredditsToIgnore"]:
                 if queryType == "comments" and item.id not in postCache["comments"]:

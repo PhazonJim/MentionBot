@@ -4,3 +4,4 @@ maxResults: 50
 searchString: "catdog"
 subredditsToIgnore: 
   - "worldnews"
+timePassed: 1000
