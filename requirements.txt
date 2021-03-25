@@ -9,7 +9,7 @@ praw==6.0.0
 prawcore==1.0.0
 psaw==0.0.7
 python-dateutil==2.7.5
-PyYAML==5.1.2
+PyYAML==5.4
 requests==2.20.0
 scraper==0.1.0
 shreddit==6.0.7
