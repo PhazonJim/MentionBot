@@ -1,6 +1,6 @@
 arrow==0.12.1
 backports-abc==0.5
-certifi==2018.10.15
+certifi==2022.12.7
 chardet==3.0.4
 discord-webhook==0.4.1
 idna==2.7
